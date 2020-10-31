@@ -7,11 +7,13 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Toast;
 
 
 /**
@@ -23,6 +25,8 @@ public class Fragment4 extends Fragment {
 
     private FragsData fragsData;
     private Observer<Integer> numberObserver;
+
+    private Observer<String> contentObserver;   //dodane przeze mnie
 
     private EditText editText;
     private TextWatcher textWatcher;
@@ -69,7 +73,7 @@ public class Fragment4 extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
@@ -79,15 +83,29 @@ public class Fragment4 extends Fragment {
 
         fragsData = new ViewModelProvider(requireActivity()).get(FragsData.class);
 
-        numberObserver = new Observer<Integer>() {
+        /*numberObserver = new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
                 turnOffWatcher = true;
                 editText.setText(integer.toString());
+                editText.setSelection(editText.length());
+            }
+        };*/
+        //to w komenatrzu bo chce uzywac contentObserver do obserwacji do obserwowania
+
+        contentObserver = new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                turnOffWatcher = true;
+                editText.setText(s);
+                editText.setSelection(editText.length());
+
             }
         };
 
-        fragsData.counter.observe(getViewLifecycleOwner(), numberObserver);
+        //fragsData.counter.observe(getViewLifecycleOwner(), numberObserver); //obserwowanie countera we fragsData.  w komenatrzu bo chce uzywac tylko content do obserwacji
+
+        fragsData.content.observe(getViewLifecycleOwner(), contentObserver); //obserwowanie contentu we frags
 
         textWatcher = new TextWatcher() {
             @Override
@@ -102,24 +120,54 @@ public class Fragment4 extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (!turnOffWatcher){
-                    Integer i;
-                    try {
-                        i = Integer.parseInt(s.toString());
+
+                if(s.toString().trim().length()>0){
+                    if (!turnOffWatcher) {
+                        //Integer i; to w komentarzu bo uzywam stringa
+                        String j;
+                        try {
+                            //i = Integer.parseInt(s.toString()); //to w komenatrzu bo uzywam stringa
+                            j = s.toString();
+                        } catch (NumberFormatException e) {
+                            //i = fragsData.counter.getValue(); //to w komentarzu bo uzywam stringa, cale to exception jest bez sensu gdy uzywam stringa
+                            j = fragsData.content.getValue();
+                        }
+                        //fragsData.counter.setValue(i);    //to w komentarzu bo uzywam content
+                        if (isNumerical(j)){
+                            fragsData.content.setValue(j);
+                            fragsData.overrideCounter();
+                        }
+                    } else {
+                        turnOffWatcher = !turnOffWatcher;
                     }
-                    catch (NumberFormatException e){
-                        i = fragsData.counter.getValue();
-                    }
-                    fragsData.counter.setValue(i);
-                }
-                else {
-                    turnOffWatcher = !turnOffWatcher;
                 }
             }
         };
-
         editText.addTextChangedListener(textWatcher);
 
         return view;
     }
+
+    public boolean isNumerical(String value){
+        try {
+            Integer.parseInt(value);
+            return true;
+        }catch (NumberFormatException e){
+            return false;
+        }
+    }
 }
+
+
+
+/*if (editText.getText().length() == 0) {
+                        editText.setText("0");
+                    }
+
+                    if(editText.getText().toString().charAt(0) == '-'){
+                        String textIGot = editText.getText().toString().substring(1);
+                        //String textIGot = editText.getText().toString();
+                        if (textIGot.length() == 0){
+                            editText.setText(editText.getText().toString().substring(2));
+                        }
+                    }*/

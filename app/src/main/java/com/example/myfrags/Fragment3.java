@@ -89,6 +89,7 @@ public class Fragment3 extends Fragment {
             public void onClick(View v) {
                 Integer i = fragsData.counter.getValue();
                 fragsData.counter.setValue(--i);
+                fragsData.overrideContent();
             }
         });
 
