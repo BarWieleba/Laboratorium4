@@ -62,7 +62,13 @@ public class MainActivity extends FragmentActivity implements Fragment1.OnButton
         outState.putBoolean("HIDEN", hiden);
     }
 
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        frames=new int[]{
+                R.id.frame1, R.id.frame2, R.id.frame3, R.id.frame4
+        };
+    }
 
     @Override
     public void onButtonClickShuffle() {

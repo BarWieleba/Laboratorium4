@@ -15,6 +15,8 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import static android.text.InputType.TYPE_NUMBER_FLAG_SIGNED;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,9 +27,6 @@ public class Fragment4 extends Fragment {
 
     private FragsData fragsData;
     private Observer<Integer> numberObserver;
-
-    private Observer<String> contentObserver;   //dodane przeze mnie
-
     private EditText editText;
     private TextWatcher textWatcher;
     private boolean turnOffWatcher;
@@ -80,32 +79,20 @@ public class Fragment4 extends Fragment {
         View view = inflater.inflate(R.layout.fragment_4, container, false);
 
         editText = view.findViewById(R.id.editTextNumber);
-
         fragsData = new ViewModelProvider(requireActivity()).get(FragsData.class);
 
-        /*numberObserver = new Observer<Integer>() {
+        numberObserver = new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
                 turnOffWatcher = true;
                 editText.setText(integer.toString());
                 editText.setSelection(editText.length());
             }
-        };*/
+        };
         //to w komenatrzu bo chce uzywac contentObserver do obserwacji do obserwowania
 
-        contentObserver = new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                turnOffWatcher = true;
-                editText.setText(s);
-                editText.setSelection(editText.length());
 
-            }
-        };
-
-        //fragsData.counter.observe(getViewLifecycleOwner(), numberObserver); //obserwowanie countera we fragsData.  w komenatrzu bo chce uzywac tylko content do obserwacji
-
-        fragsData.content.observe(getViewLifecycleOwner(), contentObserver); //obserwowanie contentu we frags
+        fragsData.counter.observe(getViewLifecycleOwner(), numberObserver); //obserwowanie countera we fragsData.  w komenatrzu bo chce uzywac tylko content do obserwacji
 
         textWatcher = new TextWatcher() {
             @Override
@@ -130,16 +117,18 @@ public class Fragment4 extends Fragment {
                             j = s.toString();
                         } catch (NumberFormatException e) {
                             //i = fragsData.counter.getValue(); //to w komentarzu bo uzywam stringa, cale to exception jest bez sensu gdy uzywam stringa
-                            j = fragsData.content.getValue();
+                            j = fragsData.counter.getValue().toString();
                         }
                         //fragsData.counter.setValue(i);    //to w komentarzu bo uzywam content
                         if (isNumerical(j)){
-                            fragsData.content.setValue(j);
-                            fragsData.overrideCounter();
+                            fragsData.counter.setValue(Integer.parseInt(j));
                         }
                     } else {
                         turnOffWatcher = !turnOffWatcher;
                     }
+                }
+                else {
+
                 }
             }
         };
@@ -157,17 +146,3 @@ public class Fragment4 extends Fragment {
         }
     }
 }
-
-
-
-/*if (editText.getText().length() == 0) {
-                        editText.setText("0");
-                    }
-
-                    if(editText.getText().toString().charAt(0) == '-'){
-                        String textIGot = editText.getText().toString().substring(1);
-                        //String textIGot = editText.getText().toString();
-                        if (textIGot.length() == 0){
-                            editText.setText(editText.getText().toString().substring(2));
-                        }
-                    }*/
